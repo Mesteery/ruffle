@@ -9,7 +9,7 @@ package flash.display {
 		import flash.utils.ByteArray;
 		import flash.net.URLRequest;
 		import flash.events.UncaughtErrorEvents;
-   		import __ruffle__.stub_method;
+   	import __ruffle__.stub_method;
 
 		internal var _contentLoaderInfo: LoaderInfo;
 

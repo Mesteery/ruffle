@@ -22,6 +22,7 @@ use ruffle_core::socket::{ConnectionState, SocketAction, SocketHandle};
 use std::collections::HashSet;
 use std::io;
 use std::io::ErrorKind;
+use std::path::PathBuf;
 use std::rc::Rc;
 use std::str::FromStr;
 use std::sync::mpsc::Sender;

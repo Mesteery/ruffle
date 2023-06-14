@@ -189,6 +189,16 @@ impl UiBackend for DesktopUiBackend {
         Ok(())
     }
 
+    fn get_screens_sizes(&self) -> Vec<(u32, u32)> {
+        self.window
+            .available_monitors()
+            .map(|m| {
+                let size = m.size();
+                (size.width, size.height)
+            })
+            .collect()
+    }
+
     fn display_root_movie_download_failed_message(&self) {
         let dialog = MessageDialog::new()
             .set_level(MessageLevel::Warning)

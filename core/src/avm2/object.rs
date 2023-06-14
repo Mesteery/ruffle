@@ -41,6 +41,8 @@ mod domain_object;
 mod error_object;
 mod event_object;
 mod font_object;
+mod file_object;
+mod filestream_object;
 mod function_object;
 mod index_buffer_3d_object;
 mod loaderinfo_object;
@@ -87,6 +89,10 @@ pub use crate::avm2::object::domain_object::{
 pub use crate::avm2::object::error_object::{error_allocator, ErrorObject, ErrorObjectWeak};
 pub use crate::avm2::object::event_object::{event_allocator, EventObject, EventObjectWeak};
 pub use crate::avm2::object::font_object::{font_allocator, FontObject, FontObjectWeak};
+pub use crate::avm2::object::file_object::{file_allocator, FileObject, FileObjectWeak};
+pub use crate::avm2::object::filestream_object::{
+    file_stream_allocator, FileStreamObject, FileStreamObjectWeak,
+};
 pub use crate::avm2::object::function_object::{
     function_allocator, FunctionObject, FunctionObjectWeak,
 };
@@ -188,6 +194,9 @@ use crate::font::Font;
         ShaderDataObject(ShaderDataObject<'gc>),
         SocketObject(SocketObject<'gc>),
         FontObject(FontObject<'gc>)
+        FileObject(FileObject<'gc>),
+        FileStreamObject(FileStreamObject<'gc>),
+        SocketObject(SocketObject<'gc>)
     }
 )]
 pub trait TObject<'gc>: 'gc + Collect + Debug + Into<Object<'gc>> + Clone + Copy {
@@ -1399,6 +1408,11 @@ pub trait TObject<'gc>: 'gc + Collect + Debug + Into<Object<'gc>> + Clone + Copy
     }
 
     fn as_net_connection(self) -> Option<NetConnectionObject<'gc>> {
+    fn as_file_object(&self) -> Option<FileObject<'gc>> {
+        None
+    }
+
+    fn as_file_stream_object(&self) -> Option<FileStreamObject<'gc>> {
         None
     }
 
@@ -1454,6 +1468,9 @@ impl<'gc> Object<'gc> {
             Self::ShaderDataObject(o) => WeakObject::ShaderDataObject(ShaderDataObjectWeak(Gc::downgrade(o.0))),
             Self::SocketObject(o) => WeakObject::SocketObject(SocketObjectWeak(Gc::downgrade(o.0))),
             Self::FontObject(o) => WeakObject::FontObject(FontObjectWeak(GcCell::downgrade(o.0))),
+            Self::FileObject(o) => WeakObject::FileObject(FileObjectWeak(GcCell::downgrade(o.0))),
+            Self::FileStreamObject(o) => WeakObject::FileStreamObject(FileStreamObjectWeak(GcCell::downgrade(o.0))),
+            Self::SocketObject(o) => WeakObject::SocketObject(SocketObjectWeak(Gc::downgrade(o.0)))
         }
     }
 }
@@ -1511,6 +1528,8 @@ pub enum WeakObject<'gc> {
     NetConnectionObject(NetConnectionObjectWeak<'gc>),
     ResponderObject(ResponderObjectWeak<'gc>),
     ShaderDataObject(ShaderDataObjectWeak<'gc>),
+    FileObject(FileObjectWeak<'gc>),
+    FileStreamObject(FileStreamObjectWeak<'gc>),
     SocketObject(SocketObjectWeak<'gc>),
     FontObject(FontObjectWeak<'gc>),
 }
@@ -1553,6 +1572,8 @@ impl<'gc> WeakObject<'gc> {
             Self::NetConnectionObject(o) => NetConnectionObject(o.0.upgrade(mc)?).into(),
             Self::ResponderObject(o) => ResponderObject(o.0.upgrade(mc)?).into(),
             Self::ShaderDataObject(o) => ShaderDataObject(o.0.upgrade(mc)?).into(),
+            Self::FileObject(o) => FileObject(o.0.upgrade(mc)?).into(),
+            Self::FileStreamObject(o) => FileStreamObject(o.0.upgrade(mc)?).into(),
             Self::SocketObject(o) => SocketObject(o.0.upgrade(mc)?).into(),
             Self::FontObject(o) => FontObject(o.0.upgrade(mc)?).into(),
         })

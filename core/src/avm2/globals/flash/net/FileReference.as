@@ -6,57 +6,57 @@ package flash.net
 
     public class FileReference extends EventDispatcher
     {
-        private var _creationDate: Date;
-        private var _creator: String;
-        private var _data: ByteArray;
-        private var _extension: String;
-        private var _modificationDate: Date;
-        private var _name: String;
-        private static var _permissionStatus: String;
-        private var _size: Number;
-        private var _type: String;
-
         public function FileReference() {
             
         }
 
         public function get creationDate(): Date {
-            return this._creationDate;
+            stub_method("flash.net.FileReference", "creationDate");
+            return new Date();
         }   
 
         public function get creator(): String {
-            retunr this._creator;
+            stub_method("flash.net.FileReference", "creator");
+            return "";
         }   
 
         public function get data(): ByteArray {
-            return this._data;
+            stub_method("flash.net.FileReference", "data");
+            return new ByteArray();
         }   
 
         public function get extension(): String {
-            return this._extension;
+            stub_method("flash.net.FileReference", "extension");
+            return "";
         }   
 
         public function get modificationDate(): Date {
-            return this._modificationDate;
+            stub_method("flash.net.FileReference", "modificationDate");
+            return new Date();
         }   
 
         public function get name(): String {
-            retunr this._name;
+            stub_method("flash.net.FileReference", "name");
+            return "";
         }   
 
         public static function get permissionStatus(): String {
-            return FileReference._permissionStatus;
+            stub_method("flash.net.FileReference", "permissionStatus");
+            return "granted";
         }   
 
         public function get size(): Number {
-            return this._size;
+            stub_method("flash.net.FileReference", "size");
+            return 0;
         }   
 
         public function get type(): String {
-            return this._type;
+            stub_method("flash.net.FileReference", "type");
+            return "";
         }   
 
         public function browse(typeFilter:Array = null):Boolean {
+            stub_method("flash.net.FileReference", "browse");
             return false;
         }   
 

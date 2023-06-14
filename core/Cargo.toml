@@ -28,11 +28,11 @@ num-traits = "0.2"
 num-derive = "0.4"
 quick-xml = "0.31.0"
 downcast-rs = "1.2.0"
-url = "2.5.0"
+url = { git = "https://github.com/Mesteery/rust-url", branch = "patch-1" }
 weak-table = "0.3.2"
 percent-encoding = "2.3.1"
 thiserror = "1.0"
-chrono = { version = "0.4", default-features = false, features = ["clock"] }
+chrono = { version = "0.4", default-features = false, features = ["clock", "unstable-locales"] }
 web-time = "0.2.3"
 encoding_rs = "0.8.33"
 rand = { version = "0.8.5", features = ["std", "small_rng"], default-features = false }
@@ -58,6 +58,7 @@ flv-rs = { path = "../flv" }
 async-channel = "2.1.1"
 jpegxr = { git = "https://github.com/ruffle-rs/jpegxr", branch = "ruffle", optional = true }
 image = { version = "0.24.7", default-features = false, features = ["tiff", "dxt"] }
+path-clean = "1.0.1"
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies.futures]
 version = "0.3.29"

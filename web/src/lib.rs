@@ -4,6 +4,7 @@
 mod audio;
 mod log_adapter;
 mod navigator;
+mod filesystem;
 mod storage;
 mod ui;
 
@@ -613,6 +614,9 @@ impl Ruffle {
             config.socket_proxy,
             config.credential_allow_list,
         ));
+
+        builder =
+            builder.with_filesystem_storage(filesystem::VirtualFileSystemStorageBackend::new());
 
         match window.local_storage() {
             Ok(Some(s)) => {

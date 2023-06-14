@@ -138,6 +138,24 @@ impl<'gc> ArrayStorage<'gc> {
         }
     }
 
+    /// Insert a value at a specific position in the vector.
+    ///
+    /// Negative bounds are supported and treated as indexing from the end of
+    /// the array, backwards.
+    pub fn insert(&mut self, position: i32, value: Value<'gc>) {
+        let position = if position < 0 {
+            max(position + self.storage.len() as i32, 0) as usize
+        } else {
+            position as usize
+        };
+
+        if position >= self.storage.len() {
+            self.storage.push(Some(value));
+        } else {
+            self.storage.insert(position, Some(value));
+        }
+    }
+
     /// Unshift a single value onto the start of this array.
     ///
     /// It is not possible to push a hole onto the array.

@@ -58,6 +58,8 @@ panic = "unwind"
 
 [profile.release]
 panic = "abort"
+lto = true
+codegen-units = 1
 
 [profile.dev.package.h263-rs]
 opt-level = 3

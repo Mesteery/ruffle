@@ -16,16 +16,24 @@ egui-wgpu = { version = "0.23.0", features = ["winit"] }
 image = { version = "0.24", features = ["png"] }
 egui-winit = "0.23.0"
 fontdb = "0.16"
-ruffle_core = { path = "../core", features = ["audio", "clap", "mp3", "nellymoser", "default_compatibility_rules", "egui", "default_font"] }
+ruffle_core = { path = "../core", features = [
+  "audio",
+  "clap",
+  "mp3",
+  "nellymoser",
+  "default_compatibility_rules",
+  "egui",
+  "default_font",
+] }
 ruffle_render = { path = "../render", features = ["clap"] }
 ruffle_render_wgpu = { path = "../render/wgpu", features = ["clap"] }
 ruffle_video_software = { path = "../video/software", optional = true }
-tracing = { workspace = true}
+tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 generational-arena = "0.2.9"
 winit = "0.28.7"
 webbrowser = "0.8.12"
-url = "2.5.0"
+url = { git = "https://github.com/Mesteery/rust-url", branch = "patch-1" }
 arboard = "3.3.0"
 dirs = "5.0"
 isahc = { version = "1.7.2", features = ["cookies"] }
@@ -43,6 +51,7 @@ futures-lite = "2.0.1"
 async-io = "2.2.1"
 async-net = "2.0.0"
 async-channel = "2.1.1"
+directories = "5.0.1"
 
 # Deliberately held back to match tracy client used by profiling crate
 tracing-tracy = { version = "=0.10.4", optional = true }

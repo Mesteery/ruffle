@@ -6,6 +6,7 @@ use crate::avm1::{Object as Avm1Object, Value as Avm1Value};
 use crate::avm2::{Avm2, Object as Avm2Object, SoundChannelObject};
 use crate::backend::{
     audio::{AudioBackend, AudioManager, SoundHandle, SoundInstanceHandle},
+    filesystem::FileSystemBackend,
     log::LogBackend,
     navigator::NavigatorBackend,
     storage::StorageBackend,
@@ -119,6 +120,9 @@ pub struct UpdateContext<'a, 'gc> {
 
     /// The storage backend, used for storing persistent state
     pub storage: &'a mut dyn StorageBackend,
+
+    /// The filesystem backend, used for loading external files
+    pub filesystem: &'a mut dyn FileSystemBackend,
 
     /// The logging backend, used for trace output capturing.
     ///
@@ -362,6 +366,7 @@ impl<'a, 'gc> UpdateContext<'a, 'gc> {
             ui: self.ui,
             video: self.video,
             storage: self.storage,
+            filesystem: self.filesystem,
             rng: self.rng,
             stage: self.stage,
             mouse_over_object: self.mouse_over_object,

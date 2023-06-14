@@ -1,6 +1,6 @@
 use crate::backends::{
     CpalAudioBackend, DesktopExternalInterfaceProvider, DesktopFSCommandProvider, DesktopUiBackend,
-    DiskStorageBackend, ExternalNavigatorBackend,
+    DiskStorageBackend, ExternalNavigatorBackend, OsFileSystemBackend,
 };
 use crate::cli::Opt;
 use crate::custom_event::RuffleEvent;
@@ -121,6 +121,17 @@ impl ActivePlayer {
             opt.tcp_connections,
         );
 
+        let filesystem = OsFileSystemBackend::new(
+            opt.base
+                .to_owned()
+                .unwrap_or_else(|| movie_url.clone())
+                .to_file_path()
+                .unwrap()
+                .parent()
+                .unwrap()
+                .into(),
+        );
+
         if cfg!(feature = "software_video") {
             builder =
                 builder.with_video(ruffle_video_software::backend::SoftwareVideoBackend::new());
@@ -145,6 +156,7 @@ impl ActivePlayer {
 
         builder = builder
             .with_navigator(navigator)
+            .with_filesystem_storage(filesystem)
             .with_renderer(renderer)
             .with_storage(DiskStorageBackend::new().expect("Couldn't create storage backend"))
             .with_fs_commands(Box::new(DesktopFSCommandProvider {

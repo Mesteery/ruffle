@@ -5,9 +5,11 @@ package flash.display {
     import flash.geom.Rectangle;
     import flash.geom.Transform;
     import flash.ui.ContextMenu;
+    import __ruffle__.stub_getter;
 
     [Ruffle(NativeInstanceInit)]
     public class Stage extends DisplayObjectContainer {
+        private var _nativeWindow:NativeWindow;
 
         public function Stage() {
             throw new Error("You cannot construct new instances of the Stage.")
@@ -162,5 +164,12 @@ package flash.display {
         public native function get stage3Ds():Vector.<Stage3D>;
 
         public native function invalidate():void;
+
+        public function get nativeWindow():NativeWindow {
+            if (!_nativeWindow) {
+                _nativeWindow = new NativeWindow(new NativeWindowInitOptions(), this);
+            }
+            return _nativeWindow;
+        }
     }
 }
