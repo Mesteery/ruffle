@@ -2,6 +2,7 @@ use crate::avm2::error::{eof_error, make_error_2006};
 use crate::avm2::Activation;
 use crate::avm2::Error;
 use crate::string::{FromWStr, WStr};
+use flash_lso::types::AMFVersion;
 use flate2::read::*;
 use flate2::Compression;
 use gc_arena::Collect;
@@ -81,6 +82,15 @@ impl FromWStr for CompressionAlgorithm {
 pub enum ObjectEncoding {
     Amf0 = 0,
     Amf3 = 3,
+}
+
+impl Into<AMFVersion> for ObjectEncoding {
+    fn into(self) -> AMFVersion {
+        match self {
+            ObjectEncoding::Amf0 => AMFVersion::AMF0,
+            ObjectEncoding::Amf3 => AMFVersion::AMF3,
+        }
+    }
 }
 
 #[derive(Clone, Collect, Debug)]
@@ -350,6 +360,11 @@ impl ByteArrayStorage {
 
     #[inline]
     pub fn bytes_mut(&mut self) -> &mut [u8] {
+        &mut self.bytes
+    }
+
+    #[inline]
+    pub fn vec_mut(&mut self) -> &mut Vec<u8> {
         &mut self.bytes
     }
 

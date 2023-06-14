@@ -1,4 +1,5 @@
 use crate::external_interface::JavascriptInterface;
+use crate::filesystem::VirtualFileSystemStorageBackend;
 use crate::navigator::WebNavigatorBackend;
 use crate::{
     audio, log_adapter, storage, ui, JavascriptPlayer, RuffleHandle, SocketProxy,
@@ -578,7 +579,8 @@ impl RuffleInstanceBuilder {
             .with_boxed_renderer(renderer)
             .with_boxed_audio(self.create_audio_backend(log_subscriber.clone()))
             .with_navigator(self.create_navigator(log_subscriber.clone()))
-            .with_storage(self.create_storage_backend());
+            .with_storage(self.create_storage_backend())
+            .with_filesystem_storage(VirtualFileSystemStorageBackend::new());
 
         // Create the external interface.
         if self.allow_script_access && self.allow_networking == NetworkingAccessMode::All {

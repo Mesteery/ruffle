@@ -164,6 +164,7 @@ pub struct SystemClasses<'gc> {
     pub shaderparameter: ClassObject<'gc>,
     pub netstatusevent: ClassObject<'gc>,
     pub shaderfilter: ClassObject<'gc>,
+    pub file: ClassObject<'gc>,
     pub statusevent: ClassObject<'gc>,
     pub asyncerrorevent: ClassObject<'gc>,
     pub contextmenuevent: ClassObject<'gc>,
@@ -294,6 +295,7 @@ impl<'gc> SystemClasses<'gc> {
             shaderparameter: object,
             netstatusevent: object,
             shaderfilter: object,
+            file: object,
             statusevent: object,
             asyncerrorevent: object,
             contextmenuevent: object,
@@ -860,6 +862,7 @@ fn load_playerglobal<'gc>(
             ("flash.filters", "GradientGlowFilter", gradientglowfilter),
             ("flash.filters", "ShaderFilter", shaderfilter),
             ("flash.events", "SampleDataEvent", sampledataevent),
+            ("flash.filesystem", "File", file),
         ]
     );
 

@@ -31,7 +31,7 @@ tracing-appender = "0.2.3"
 winit = "0.29.15"
 webbrowser = "1.0.1"
 url = { workspace = true }
-dirs = "5.0"
+dirs = "5.0" # TODO remove in favor of directories
 rfd = "0.14.1"
 anyhow = { workspace = true }
 bytemuck = { workspace = true }
@@ -44,7 +44,8 @@ chrono = { workspace = true }
 fluent-templates = "0.9.4"
 toml_edit = { version = "0.22.16", features = ["parse"] }
 gilrs = "0.10"
-tokio = { workspace = true, features = ["rt-multi-thread", "macros"]}
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+directories = "5.0.1"
 
 # Deliberately held back to match tracy client used by profiling crate
 tracing-tracy = { version = "=0.10.4", optional = true }

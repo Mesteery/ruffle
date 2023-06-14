@@ -14,6 +14,7 @@ package flash.display {
     public class Stage extends DisplayObjectContainer {
         private var _colorCorrection:String = ColorCorrection.DEFAULT;
         private var _mouseLock:Boolean = false;
+        private var _nativeWindow:NativeWindow;
 
         public function Stage() {
             throw new Error("You cannot construct new instances of the Stage.")
@@ -320,6 +321,13 @@ package flash.display {
         [API("668")]
         public function setAspectRatio(newAspectRatio:String):void {
             stub_method("flash.display.Stage", "setAspectRatio");
+        }
+        
+        public function get nativeWindow():NativeWindow {
+            if (!this._nativeWindow) {
+                this._nativeWindow = new NativeWindow(new NativeWindowInitOptions(), this);
+            }
+            return this._nativeWindow;
         }
     }
 }

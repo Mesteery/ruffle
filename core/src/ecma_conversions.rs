@@ -43,6 +43,10 @@ pub fn f64_to_wrapping_i32(n: f64) -> i32 {
     f64_to_wrapping_u32(n) as i32
 }
 
+pub fn f64_to_wrapping_f32(n: f64) -> f32 {
+    n as f32
+}
+
 /// Implements the IEEE-754 "Round to nearest, ties to even" rounding rule.
 /// (e.g., both 1.5 and 2.5 will round to 2).
 /// This also clamps out-of-range values and NaN to `i32::MIN`.

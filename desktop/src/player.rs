@@ -1,6 +1,6 @@
 use crate::backends::{
     CpalAudioBackend, DesktopExternalInterfaceProvider, DesktopFSCommandProvider, DesktopUiBackend,
-    RfdNavigatorInterface,
+    OsFileSystemBackend, RfdNavigatorInterface,
 };
 use crate::custom_event::RuffleEvent;
 use crate::gui::MovieView;
@@ -243,6 +243,18 @@ impl ActivePlayer {
             }
         }
 
+        let filesystem = OsFileSystemBackend::new(
+            opt.player
+                .base
+                .to_owned()
+                .unwrap_or_else(|| movie_url.clone())
+                .to_file_path()
+                .unwrap()
+                .parent()
+                .unwrap()
+                .into(),
+        );
+
         let renderer = WgpuRenderBackend::new(descriptors, movie_view)
             .map_err(|e| anyhow!(e.to_string()))
             .expect("Couldn't create wgpu rendering backend");
@@ -260,6 +272,7 @@ impl ActivePlayer {
 
         builder = builder
             .with_navigator(navigator)
+            .with_filesystem_storage(filesystem)
             .with_renderer(renderer)
             .with_storage(preferences.storage_backend().create_backend(&opt))
             .with_fs_commands(Box::new(DesktopFSCommandProvider {

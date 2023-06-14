@@ -45,8 +45,10 @@ package flash.globalization {
         public function formatUTC(dateTime:Date):String {
             stub_method("flash.globalization.DateTimeFormatter", "formatUTC");
             if (dateTime == null) throwNonNull("dateTime");
-            return dateTime.toUTCString();
+            return formatUTCInternal(dateTime, this._localeIDName, this._dateTimePattern);
         }
+
+        public native function formatUTCInternal(dateTime:Date, locale:String):String;
 
         public static function getAvailableLocaleIDNames():Vector.<String> {
             stub_method("flash.globalization.DateTimeFormatter", "getAvailableLocaleIDNames");
