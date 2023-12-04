@@ -3,9 +3,9 @@ pub use crate::avm2::object::file_allocator;
 use crate::avm2::parameters::ParametersExt;
 use crate::avm2::{Activation, ArrayObject, ArrayStorage, Error, Object, TObject, Value};
 use crate::string::AvmString;
+use path_clean::PathClean;
 use std::path::PathBuf;
 use url::Url;
-use path_clean::PathClean;
 
 pub fn get_separator<'gc>(
     activation: &mut Activation<'_, 'gc>,
@@ -67,10 +67,8 @@ pub fn set_native_path<'gc>(
 ) -> Result<Value<'gc>, Error<'gc>> {
     if let Some(file_object) = this.as_file_object() {
         let path = args.get_string(activation, 0)?;
-        file_object.set_native_path(
-            activation.context.gc_context,
-            PathBuf::from(path.to_string()),
-        );
+        file_object.set_native_path(Some(PathBuf::from(path.to_string()).clean()));
+        file_object.set_formatted_url(None);
     }
 
     Ok(Value::Undefined)
@@ -204,7 +202,7 @@ pub fn create_directory<'gc>(
 ) -> Result<Value<'gc>, Error<'gc>> {
     if let Some(file_object) = this.as_file_object() {
         if let Some(path) = file_object.native_path() {
-            if let Err(e) = activation.context.filesystem.create_directory(&path) {
+            if let Err(_) = activation.context.filesystem.create_directory(&path) {
                 return Err(Error::AvmError(io_error(activation, "TODO", 1000)?));
             }
         }
@@ -220,7 +218,7 @@ pub fn delete_directory<'gc>(
 ) -> Result<Value<'gc>, Error<'gc>> {
     if let Some(file_object) = this.as_file_object() {
         if let Some(path) = file_object.native_path() {
-            if let Err(e) = activation
+            if let Err(_) = activation
                 .context
                 .filesystem
                 .delete_directory(&path, args.get_bool(0))
@@ -240,7 +238,7 @@ pub fn delete_file<'gc>(
 ) -> Result<Value<'gc>, Error<'gc>> {
     if let Some(file_object) = this.as_file_object() {
         if let Some(path) = file_object.native_path() {
-            if let Err(e) = activation.context.filesystem.delete_file(&path) {
+            if let Err(_) = activation.context.filesystem.delete_file(&path) {
                 return Err(Error::AvmError(io_error(activation, "TODO", 1000)?));
             }
         }
@@ -268,18 +266,14 @@ pub fn get_directory_listing<'gc>(
                                 .construct(activation, &[])
                                 .ok()?
                                 .as_file_object()?;
-                            file_entry_object
-                                .0
-                                .write(activation.context.gc_context)
-                                .path
-                                .replace(entry);
+                            file_entry_object.set_native_path(Some(entry));
                             Some(Some(file_entry_object.into()))
                         })
                         .collect::<Vec<Option<Value<'gc>>>>();
                     let storage = ArrayStorage::from_storage(values);
                     Ok(ArrayObject::from_storage(activation, storage)?.into())
                 }
-                Err(e) => Err(Error::AvmError(io_error(activation, "TODO", 1000)?)),
+                Err(_) => Err(Error::AvmError(io_error(activation, "TODO", 1000)?)),
             };
         }
     }
@@ -302,22 +296,24 @@ pub fn resolve_path<'gc>(
             .construct(activation, &[])?
             .as_file_object()
         {
-            new_file_object.0.write(activation.context.gc_context).path =
-                file_object.native_path().and_then(|p| Some(p.join(&path).clean()));
+            new_file_object.set_native_path(
+                file_object
+                    .native_path()
+                    .and_then(|p| Some(p.join(&path).clean())),
+            );
 
-            if let Some(mut formatted_url) = file_object.0.read().formatted_url.clone() {
+            if let Some(mut formatted_url) = file_object.formatted_url() {
                 if !formatted_url.ends_with('/') {
                     formatted_url.push('/');
                 }
 
-                new_file_object
-                    .0
-                    .write(activation.context.gc_context)
-                    .formatted_url = Url::parse(&formatted_url)
-                    .unwrap()
-                    .join(&path.to_string_lossy())
-                    .ok()
-                    .map(|u| u.into());
+                new_file_object.set_formatted_url(
+                    Url::parse(&formatted_url)
+                        .unwrap()
+                        .join(&path.to_string_lossy())
+                        .ok()
+                        .map(|u| u.into()),
+                );
             }
 
             return Ok(new_file_object.into());
@@ -333,8 +329,7 @@ pub fn move_to<'gc>(
     args: &[Value<'gc>],
 ) -> Result<Value<'gc>, Error<'gc>> {
     if let Some(file_object) = this.as_file_object() {
-        if let Some(dest_file_object) = args.get_object(activation, 0, "File")?.as_file_object()
-        {
+        if let Some(dest_file_object) = args.get_object(activation, 0, "File")?.as_file_object() {
             if let (Some(path), Some(dest_path)) =
                 (file_object.native_path(), dest_file_object.native_path())
             {
@@ -359,8 +354,7 @@ pub fn copy_to<'gc>(
     args: &[Value<'gc>],
 ) -> Result<Value<'gc>, Error<'gc>> {
     if let Some(file_object) = this.as_file_object() {
-        if let Some(dest_file_object) = args.get_object(activation, 0, "File")?.as_file_object()
-        {
+        if let Some(dest_file_object) = args.get_object(activation, 0, "File")?.as_file_object() {
             if let (Some(path), Some(dest_path)) =
                 (file_object.native_path(), dest_file_object.native_path())
             {
@@ -432,22 +426,24 @@ pub fn get_parent<'gc>(
             .construct(activation, &[])?
             .as_file_object()
         {
-            if let Some(parent) = file_object.native_path().and_then(|p| Some(p.parent()?.to_owned())) {
-                new_file_object.0.write(activation.context.gc_context).path.replace(parent.clean());
+            if let Some(parent) = file_object
+                .native_path()
+                .and_then(|p| Some(p.parent()?.to_owned()))
+            {
+                new_file_object.set_native_path(Some(parent.clean()));
 
-                if let Some(mut formatted_url) = file_object.0.read().formatted_url.clone() {
+                if let Some(mut formatted_url) = file_object.formatted_url() {
                     if !formatted_url.ends_with('/') {
                         formatted_url.push('/');
                     }
 
-                    new_file_object
-                        .0
-                        .write(activation.context.gc_context)
-                        .formatted_url = Url::parse(&formatted_url)
-                        .unwrap()
-                        .join("..")
-                        .ok()
-                        .map(|u| u.into());
+                    new_file_object.set_formatted_url(
+                        Url::parse(&formatted_url)
+                            .unwrap()
+                            .join("..")
+                            .ok()
+                            .map(|u| u.into()),
+                    )
                 }
 
                 return Ok(new_file_object.into());

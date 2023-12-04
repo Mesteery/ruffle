@@ -1,34 +1,29 @@
 use crate::avm2::amf::{deserialize_value, serialize_value};
-use crate::avm2::bytearray::{ByteArrayStorage, ObjectEncoding};
+use crate::avm2::bytearray::{ByteArrayStorage, Endian, ObjectEncoding};
 use crate::avm2::error::io_error;
 pub use crate::avm2::object::file_stream_allocator;
 use crate::avm2::parameters::ParametersExt;
+use crate::avm2::{Activation, Error, Object, TObject, Value};
 use crate::backend::filesystem::File;
 use crate::ecma_conversions::{
-    f64_to_wrapping_f32, f64_to_wrapping_i16, f64_to_wrapping_i32, f64_to_wrapping_i8,
+    f64_to_wrapping_f32, f64_to_wrapping_i16, f64_to_wrapping_i32, f64_to_wrapping_u16,
     f64_to_wrapping_u32,
 };
 use crate::string::AvmString;
-use byteorder::{NativeEndian, ReadBytesExt, WriteBytesExt};
 use encoding_rs::{Encoding, UTF_8};
 use flash_lso::amf0::read::AMF0Decoder;
 use flash_lso::amf3::read::AMF3Decoder;
 use flash_lso::types::{AMFVersion, Element, Lso};
 use ruffle_wstr::WString;
 use std::io::{Read, SeekFrom};
-use std::rc::Rc;
 
 pub fn get_bytes_available<'gc>(
-    activation: &mut Activation<'_, 'gc>,
+    _activation: &mut Activation<'_, 'gc>,
     this: Object<'gc>,
     _args: &[Value<'gc>],
 ) -> Result<Value<'gc>, Error<'gc>> {
     if let Some(file_stream_object) = this.as_file_stream_object() {
-        if let Some(ref mut handle) = file_stream_object
-            .0
-            .write(activation.context.gc_context)
-            .handle
-        {
+        if let Some(ref mut handle) = *file_stream_object.handle().borrow_mut() {
             if let (Ok(len), Ok(pos)) = (handle.stream_len(), handle.stream_position()) {
                 return Ok((len - pos).into());
             }
@@ -39,16 +34,12 @@ pub fn get_bytes_available<'gc>(
 }
 
 pub fn get_position<'gc>(
-    activation: &mut Activation<'_, 'gc>,
+    _activation: &mut Activation<'_, 'gc>,
     this: Object<'gc>,
     _args: &[Value<'gc>],
 ) -> Result<Value<'gc>, Error<'gc>> {
     if let Some(file_stream_object) = this.as_file_stream_object() {
-        if let Some(ref mut handle) = file_stream_object
-            .0
-            .write(activation.context.gc_context)
-            .handle
-        {
+        if let Some(ref mut handle) = *file_stream_object.handle().borrow_mut() {
             return Ok(handle.stream_position().unwrap_or(0).into());
         }
     }
@@ -67,13 +58,9 @@ pub fn set_position<'gc>(
         .coerce_to_u32(activation)? as u64;
 
     if let Some(file_stream_object) = this.as_file_stream_object() {
-        if let Some(ref mut handle) = file_stream_object
-            .0
-            .write(activation.context.gc_context)
-            .handle
-        {
-            if let Err(e) = handle.seek(SeekFrom::Start(pos)) {
-                returnErr(Error::AvmError(io_error(activation, "TODO", 1000)?))
+        if let Some(ref mut handle) = *file_stream_object.handle().borrow_mut() {
+            if let Err(_) = handle.seek(SeekFrom::Start(pos)) {
+                return Err(Error::AvmError(io_error(activation, "TODO", 1000)?));
             }
         }
     }
@@ -110,14 +97,11 @@ pub fn set_endian<'gc>(
             .get(0)
             .unwrap_or(&Value::Undefined)
             .coerce_to_string(activation)?;
-        file_stream_object.set_endian(
-            activation.context.gc_context,
-            match endian.to_string().as_str() {
-                "bigEndian" => Endian::Big,
-                "littleEndian" => Endian::Little,
-                _ => return Ok(Value::Undefined),
-            },
-        );
+        file_stream_object.set_endian(match endian.to_string().as_str() {
+            "bigEndian" => Endian::Big,
+            "littleEndian" => Endian::Little,
+            _ => return Ok(Value::Undefined),
+        });
     }
 
     Ok(Value::Undefined)
@@ -145,14 +129,11 @@ pub fn set_object_encoding<'gc>(
             .get(0)
             .unwrap_or(&Value::Undefined)
             .coerce_to_u32(activation)?;
-        file_stream_object.set_object_encoding(
-            activation.context.gc_context,
-            match encoding {
-                0 => ObjectEncoding::Amf0,
-                3 => ObjectEncoding::Amf3,
-                _ => return Ok(Value::Undefined),
-            },
-        );
+        file_stream_object.set_object_encoding(match encoding {
+            0 => ObjectEncoding::Amf0,
+            3 => ObjectEncoding::Amf3,
+            _ => return Ok(Value::Undefined),
+        });
     }
 
     Ok(Value::Undefined)
@@ -163,47 +144,34 @@ pub fn open<'gc>(
     this: Object<'gc>,
     args: &[Value<'gc>],
 ) -> Result<Value<'gc>, Error<'gc>> {
-    if let Some(this) = this {
-        if let Some(file_stream_object) = this.as_file_stream_object() {
-            if file_stream_object.0.read().handle.is_none() {
-                if let Some(file_object) = args.get_object(activation, 0, "File")?.as_file_object()
-                {
-                    if let Some(path) = file_object.native_path() {
-                        let mode = args.get_string(activation, 1)?.to_string();
-                        let handle = match activation
-                            .context
-                            .filesystem
-                            .open(&path, mode.as_str().into())
-                        {
-                            Ok(handle) => handle,
-                            Err(e) => {
-                                return Err(Error::AvmError(io_error(activation, "TODO", 1000)?))
-                            }
-                        };
-                        file_stream_object
-                            .0
-                            .write(activation.context.gc_context)
-                            .handle
-                            .replace(handle);
-                    }
+    if let Some(file_stream_object) = this.as_file_stream_object() {
+        if file_stream_object.handle().borrow().is_none() {
+            if let Some(file_object) = args.get_object(activation, 0, "File")?.as_file_object() {
+                if let Some(path) = file_object.native_path() {
+                    let mode = args.get_string(activation, 1)?.to_string();
+                    let handle = match activation
+                        .context
+                        .filesystem
+                        .open(&path, mode.as_str().into())
+                    {
+                        Ok(handle) => handle,
+                        Err(_) => return Err(Error::AvmError(io_error(activation, "TODO", 1000)?)),
+                    };
+                    file_stream_object.set_handle(Some(handle));
                 }
             }
         }
     }
-    Ok(Value::Undefined)
+    Err(Error::AvmError(io_error(activation, "TODO", 1000)?))
 }
 
 pub fn close<'gc>(
-    activation: &mut Activation<'_, 'gc>,
+    _activation: &mut Activation<'_, 'gc>,
     this: Object<'gc>,
     _args: &[Value<'gc>],
 ) -> Result<Value<'gc>, Error<'gc>> {
     if let Some(file_stream_object) = this.as_file_stream_object() {
-        file_stream_object
-            .0
-            .write(activation.context.gc_context)
-            .handle
-            .take();
+        file_stream_object.set_handle(None);
     }
 
     Ok(Value::Undefined)
@@ -215,11 +183,7 @@ pub fn truncate<'gc>(
     _args: &[Value<'gc>],
 ) -> Result<Value<'gc>, Error<'gc>> {
     if let Some(file_stream_object) = this.as_file_stream_object() {
-        if let Some(ref mut handle) = file_stream_object
-            .0
-            .write(activation.context.gc_context)
-            .handle
-        {
+        if let Some(ref mut handle) = *file_stream_object.handle().borrow_mut() {
             if handle.truncate().is_ok() {
                 return Ok(Value::Undefined);
             }
@@ -235,15 +199,14 @@ pub fn read_boolean<'gc>(
     _args: &[Value<'gc>],
 ) -> Result<Value<'gc>, Error<'gc>> {
     if let Some(file_stream_object) = this.as_file_stream_object() {
-        if let Some(ref mut handle) = file_stream_object
-            .0
-            .write(activation.context.gc_context)
-            .handle
-        {
+        if let Some(ref mut handle) = *file_stream_object.handle().borrow_mut() {
             let mut buf = [0; 1];
             handle
                 .read_exact(&mut buf)
-                .map_err(|e| rror::AvmError(io_error(activation, "TODO", 1000)?))?;
+                .map_err(|_| match io_error(activation, "TODO", 1000) {
+                    Ok(e) => Error::AvmError(e),
+                    Err(e) => e,
+                })?;
             return Ok((buf == [1]).into());
         }
     }
@@ -252,15 +215,18 @@ pub fn read_boolean<'gc>(
 }
 
 macro_rules! impl_write {
-    ($($method_name:ident $as_method_name:ident $data_type:ty $($coerce:ident)?), *)
+    ($($method_name:ident $as_method_name:ident $($coerce:ident)?; $data_type:ty), *)
     =>
     {
-        $( pub fn $method_name<'gc>(handle: &mut Box<dyn File>, endian: Endian, val: $data_type) -> Result<(), Error<'gc>> {
+        $( pub fn $method_name<'gc>(activation: &mut Activation<'_, 'gc>, handle: &mut Box<dyn File>, endian: Endian, val: $data_type) -> Result<(), Error<'gc>> {
             let val_bytes = match endian {
                 Endian::Big => val.to_be_bytes(),
                 Endian::Little => val.to_le_bytes(),
             };
-            handle.write(&val_bytes).map_err(|e| Error::AvmError(io_error(activation, "TODO", 1000)?))
+            match handle.write(&val_bytes) {
+                Ok(_) => Ok(()),
+                Err(_) => Err(Error::AvmError(io_error(activation, "TODO", 1000)?)),
+            }
         } )*
 
         $( pub fn $as_method_name<'gc>(
@@ -271,12 +237,8 @@ macro_rules! impl_write {
             let n = $($coerce)?(args.get(0).unwrap_or(&Value::Undefined).coerce_to_number(activation)?);
             if let Some(file_stream_object) = this.as_file_stream_object() {
                 let endian = file_stream_object.endian();
-                if let Some(ref mut handle) = file_stream_object
-                    .0
-                    .write(activation.context.gc_context)
-                    .handle
-                {
-                    if let Ok(_) = handle.$method_name(endian, n) {
+                if let Some(ref mut handle) = *file_stream_object.handle().borrow_mut() {
+                    if let Ok(_) = $method_name(activation, handle, endian, n) {
                         return Ok(Value::Undefined);
                     }
                 }
@@ -290,12 +252,15 @@ macro_rules! impl_read {
     ($($method_name:ident $as_method_name:ident $size:expr; $data_type:ty ), *)
     =>
     {
-        $( pub fn $method_name<'gc>(handle: &mut Box<dyn File>, endian: Endian) -> Result<$data_type, Error<'gc>> {
+        $( pub fn $method_name<'gc>(activation: &mut Activation<'_, 'gc>, handle: &mut Box<dyn File>, endian: Endian) -> Result<$data_type, Error<'gc>> {
             let mut buf = [0; $size];
-            handle.read_exact(&mut buf).map_err(|e| Error::AvmError(io_error(activation, "TODO", 1000)?))?;
+            handle.read_exact(&mut buf).map_err(|_| match io_error(activation, "TODO", 1000) {
+                Ok(e) => Error::AvmError(e),
+                Err(e) => e,
+            })?;
             Ok(match endian {
-                Endian::Big => <$data_type>::from_be_bytes(&buf),
-                Endian::Little => <$data_type>::from_le_bytes(&buf),
+                Endian::Big => <$data_type>::from_be_bytes(buf),
+                Endian::Little => <$data_type>::from_le_bytes(buf),
             })
         } )*
 
@@ -306,12 +271,8 @@ macro_rules! impl_read {
         ) -> Result<Value<'gc>, Error<'gc>> {
             if let Some(file_stream_object) = this.as_file_stream_object() {
                 let endian = file_stream_object.endian();
-                if let Some(ref mut handle) = file_stream_object
-                    .0
-                    .write(activation.context.gc_context)
-                    .handle
-                {
-                    if let Ok(value) = handle.$method_name(endian) {
+                if let Some(ref mut handle) = *file_stream_object.handle().borrow_mut() {
+                    if let Ok(value) = $method_name(activation, handle, endian) {
                         return Ok(value.into());
                     }
                 };
@@ -322,8 +283,8 @@ macro_rules! impl_read {
     }
 }
 
-impl_write!(write_f32 write_float f32 f64_to_wrapping_f32, write_f64 write_double f64, write_i32 write_int i32 f64_to_wrapping_i32,
-            write_u32 write_unsigned_int u32 f64_to_wrapping_u32, write_i16 write_short i16 f64_to_wrapping_i16, write_u16 write_unsigned_short u16);
+impl_write!(write_f32 write_float f64_to_wrapping_f32; f32, write_f64 write_double; f64, write_i32 write_int f64_to_wrapping_i32; i32,
+            write_u32 write_unsigned_int f64_to_wrapping_u32; u32, write_i16 write_short f64_to_wrapping_i16; i16, write_u16 write_unsigned_short f64_to_wrapping_u16; u16);
 impl_read!(read_f32 read_float 4; f32, read_f64 read_double 8; f64, read_i32 read_int 4; i32, read_u32 read_unsigned_int 4; u32,
            read_i16 read_short 2; i16, read_u16 read_unsigned_short 2; u16, read_i8 read_byte 1; i8, read_u8 read_unsigned_byte 1; u8);
 
@@ -333,18 +294,14 @@ pub fn write_byte<'gc>(
     args: &[Value<'gc>],
 ) -> Result<Value<'gc>, Error<'gc>> {
     if let Some(file_stream_object) = this.as_file_stream_object() {
-        if let Some(ref mut handle) = file_stream_object
-            .0
-            .write(activation.context.gc_context)
-            .handle
-        {
+        if let Some(ref mut handle) = *file_stream_object.handle().borrow_mut() {
             let n = args
                 .get(0)
                 .unwrap_or(&Value::Undefined)
                 .coerce_to_i32(activation)?;
             return match handle.write(&[n as u8]) {
                 Ok(_) => Ok(Value::Undefined),
-                Err(e) => Err(io_error_to_avm(activation, e)),
+                Err(_) => Err(Error::AvmError(io_error(activation, "TODO", 1000)?)),
             };
         }
     }
@@ -358,15 +315,11 @@ pub fn write_boolean<'gc>(
     args: &[Value<'gc>],
 ) -> Result<Value<'gc>, Error<'gc>> {
     if let Some(file_stream_object) = this.as_file_stream_object() {
-        if let Some(ref mut handle) = file_stream_object
-            .0
-            .write(activation.context.gc_context)
-            .handle
-        {
+        if let Some(ref mut handle) = *file_stream_object.handle().borrow_mut() {
             let n = args.get(0).unwrap_or(&Value::Undefined).coerce_to_boolean() as u8;
             return match handle.write(&[n]) {
                 Ok(_) => Ok(Value::Undefined),
-                Err(e) => Err(io_error_to_avm(activation, e)),
+                Err(_) => Err(Error::AvmError(io_error(activation, "TODO", 1000)?)),
             };
         }
     }
@@ -390,11 +343,7 @@ pub fn write_bytes<'gc>(
 
     if let Some(buffer) = args.get_object(activation, 0, "ByteArray")?.as_bytearray() {
         if let Some(file_stream_object) = this.as_file_stream_object() {
-            if let Some(ref mut handle) = file_stream_object
-                .0
-                .write(activation.context.gc_context)
-                .handle
-            {
+            if let Some(ref mut handle) = *file_stream_object.handle().borrow_mut() {
                 let end = if length == 0 {
                     buffer.len()
                 } else {
@@ -421,11 +370,7 @@ pub fn write_multi_byte<'gc>(
     args: &[Value<'gc>],
 ) -> Result<Value<'gc>, Error<'gc>> {
     if let Some(file_stream_object) = this.as_file_stream_object() {
-        if let Some(ref mut handle) = file_stream_object
-            .0
-            .write(activation.context.gc_context)
-            .handle
-        {
+        if let Some(ref mut handle) = *file_stream_object.handle().borrow_mut() {
             let string = args
                 .get(0)
                 .unwrap_or(&Value::Undefined)
@@ -464,11 +409,7 @@ pub fn write_utf_bytes<'gc>(
     args: &[Value<'gc>],
 ) -> Result<Value<'gc>, Error<'gc>> {
     if let Some(file_stream_object) = this.as_file_stream_object() {
-        if let Some(ref mut handle) = file_stream_object
-            .0
-            .write(activation.context.gc_context)
-            .handle
-        {
+        if let Some(ref mut handle) = *file_stream_object.handle().borrow_mut() {
             let value = args
                 .get(0)
                 .unwrap_or(&Value::Undefined)
@@ -487,19 +428,15 @@ pub fn write_utf<'gc>(
 ) -> Result<Value<'gc>, Error<'gc>> {
     if let Some(file_stream_object) = this.as_file_stream_object() {
         let endian = file_stream_object.endian();
-        if let Some(ref mut handle) = file_stream_object
-            .0
-            .write(activation.context.gc_context)
-            .handle
-        {
+        if let Some(ref mut handle) = *file_stream_object.handle().borrow_mut() {
             let value = args
                 .get(0)
                 .unwrap_or(&Value::Undefined)
                 .coerce_to_string(activation)?;
             if let Ok(length) = u16::try_from(value.len()) {
-                return match handle.write_unsigned_short(endian, length) {
+                return match write_u16(activation, handle, endian, length) {
                     Ok(_) => write_utf_bytes_inner(activation, handle, value),
-                    Err(e) => Err(io_error_to_avm(activation, e)),
+                    Err(_) => Err(Error::AvmError(io_error(activation, "TODO", 1000)?)),
                 };
             } else {
                 return Err("RangeError: UTF String length must fit into a short".into());
@@ -525,11 +462,7 @@ pub fn read_bytes<'gc>(
         .coerce_to_u32(activation)? as usize;
 
     if let Some(file_stream_object) = this.as_file_stream_object() {
-        if let Some(ref mut handle) = file_stream_object
-            .0
-            .write(activation.context.gc_context)
-            .handle
-        {
+        if let Some(ref mut handle) = *file_stream_object.handle().borrow_mut() {
             if let Some(mut buffer) = args
                 .get_object(activation, 0, "ByteArray")?
                 .as_bytearray_mut(activation.context.gc_context)
@@ -571,11 +504,7 @@ pub fn read_multi_byte<'gc>(
     args: &[Value<'gc>],
 ) -> Result<Value<'gc>, Error<'gc>> {
     if let Some(file_stream_object) = this.as_file_stream_object() {
-        if let Some(ref mut handle) = file_stream_object
-            .0
-            .write(activation.context.gc_context)
-            .handle
-        {
+        if let Some(ref mut handle) = *file_stream_object.handle().borrow_mut() {
             let len = args
                 .get(0)
                 .unwrap_or(&Value::Undefined)
@@ -586,7 +515,10 @@ pub fn read_multi_byte<'gc>(
                 .coerce_to_string(activation)?;
 
             let mut bytes = vec![0; len];
-            handle.read_exact(&mut bytes)?;
+            match handle.read_exact(&mut bytes) {
+                Ok(_) => {}
+                Err(_) => return Err(Error::AvmError(io_error(activation, "TODO", 1000)?)),
+            };
             let encoder =
                 Encoding::for_label(charset_label.to_utf8_lossy().as_bytes()).unwrap_or(UTF_8);
             let decoded_str = encoder.decode(&bytes).0;
@@ -624,12 +556,8 @@ pub fn read_utf<'gc>(
 ) -> Result<Value<'gc>, Error<'gc>> {
     if let Some(file_stream_object) = this.as_file_stream_object() {
         let endian = file_stream_object.endian();
-        if let Some(ref mut handle) = file_stream_object
-            .0
-            .write(activation.context.gc_context)
-            .handle
-        {
-            let length = read_u16(handle, endian)?;
+        if let Some(ref mut handle) = *file_stream_object.handle().borrow_mut() {
+            let length = read_u16(activation, handle, endian)?;
             return read_utf_bytes_inner(activation, handle, length as usize);
         }
     }
@@ -643,11 +571,7 @@ pub fn read_utf_bytes<'gc>(
     args: &[Value<'gc>],
 ) -> Result<Value<'gc>, Error<'gc>> {
     if let Some(file_stream_object) = this.as_file_stream_object() {
-        if let Some(ref mut handle) = file_stream_object
-            .0
-            .write(activation.context.gc_context)
-            .handle
-        {
+        if let Some(ref mut handle) = *file_stream_object.handle().borrow_mut() {
             let length = args
                 .get(0)
                 .unwrap_or(&Value::Undefined)
@@ -666,20 +590,15 @@ pub fn read_object<'gc>(
 ) -> Result<Value<'gc>, Error<'gc>> {
     if let Some(file_stream_object) = this.as_file_stream_object() {
         let object_encoding = file_stream_object.object_encoding();
-        if let Some(ref mut handle) = file_stream_object
-            .0
-            .write(activation.context.gc_context)
-            .handle
-        {
+        if let Some(ref mut handle) = *file_stream_object.handle().borrow_mut() {
             let mut bytes = Vec::new();
             if handle.read_to_end(&mut bytes).is_ok() {
                 let (extra, amf) = match object_encoding {
                     ObjectEncoding::Amf0 => {
                         let mut decoder = AMF0Decoder::default();
-                        let (extra, amf) = decoder
+                        decoder
                             .parse_single_element(&bytes)
-                            .map_err(|_| "Error: Invalid object")?;
-                        (extra, Rc::new(amf))
+                            .map_err(|_| "Error: Invalid object")?
                     }
                     ObjectEncoding::Amf3 => {
                         let mut decoder = AMF3Decoder::default();
@@ -707,11 +626,7 @@ pub fn write_object<'gc>(
 ) -> Result<Value<'gc>, Error<'gc>> {
     if let Some(file_stream_object) = this.as_file_stream_object() {
         let amf_version: AMFVersion = file_stream_object.object_encoding().into();
-        if let Some(ref mut handle) = file_stream_object
-            .0
-            .write(activation.context.gc_context)
-            .handle
-        {
+        if let Some(ref mut handle) = *file_stream_object.handle().borrow_mut() {
             let obj = args.get(0).cloned().unwrap_or(Value::Undefined);
             if let Some(amf) = serialize_value(activation, obj, amf_version) {
                 let element = Element::new("", amf);

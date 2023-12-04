@@ -1,5 +1,5 @@
 use ruffle_core::backend::filesystem::{File, FileOpenMode, FileSystemBackend, KnownDirectories};
-use std::io::{Cursor, Read, Result, Write};
+use std::io::{Cursor, Read, Result, Seek, Write};
 use std::path::{Path, PathBuf};
 
 pub struct NullFile(Cursor<Vec<u8>>, PathBuf);
@@ -7,6 +7,12 @@ pub struct NullFile(Cursor<Vec<u8>>, PathBuf);
 impl File for NullFile {
     fn truncate(&mut self) -> Result<()> {
         Ok(())
+    }
+}
+
+impl Seek for NullFile {
+    fn seek(&mut self, _pos: std::io::SeekFrom) -> Result<u64> {
+        Ok(0)
     }
 }
 
@@ -57,6 +63,11 @@ impl FileSystemBackend for VirtualFileSystemStorageBackend {
         false
     }
 
+    fn size(&self, path: &Path) -> u64 {
+        tracing::info!("size: {}", path.display());
+        0
+    }
+
     fn is_hidden(&self, _path: &Path) -> bool {
         false
     }
@@ -84,7 +95,7 @@ impl FileSystemBackend for VirtualFileSystemStorageBackend {
         Ok(())
     }
 
-    fn read_directory(&self, _path: &Path) -> Result<Vec<String>> {
+    fn read_directory(&self, _path: &Path) -> Result<Vec<PathBuf>> {
         tracing::info!("read_directory: {}", _path.display());
         Ok(vec![])
     }

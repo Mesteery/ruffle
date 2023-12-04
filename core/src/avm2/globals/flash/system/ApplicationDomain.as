@@ -3,8 +3,6 @@ package flash.system {
 
     [Ruffle(InstanceAllocator)]
     public final class ApplicationDomain {
-        public static const MIN_DOMAIN_MEMORY_LENGTH:uint = 1024;
-
         public static native function get currentDomain():ApplicationDomain;
 
         public function ApplicationDomain(parentDomain:ApplicationDomain = null) {
@@ -25,6 +23,5 @@ package flash.system {
         public static function get MIN_DOMAIN_MEMORY_LENGTH():uint {
             return 1024;
         }
-
     }
 }

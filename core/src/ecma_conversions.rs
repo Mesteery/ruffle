@@ -10,12 +10,6 @@ pub fn f64_to_wrapping_u8(n: f64) -> u8 {
     }
 }
 
-/// Converts an `f64` to an `i8` with ECMAScript wrapping behavior.
-/// The value will be wrapped in the range [-2^7, 2^7).
-pub fn f64_to_wrapping_i8(n: f64) -> i8 {
-    f64_to_wrapping_u8(n) as i8
-}
-
 /// Converts an `f64` to a `u16` with ECMAScript `ToUInt16` wrapping behavior.
 /// The value will be wrapped modulo 2^16.
 pub fn f64_to_wrapping_u16(n: f64) -> u16 {
