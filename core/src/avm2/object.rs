@@ -40,9 +40,9 @@ mod dispatch_object;
 mod domain_object;
 mod error_object;
 mod event_object;
-mod font_object;
 mod file_object;
 mod filestream_object;
+mod font_object;
 mod function_object;
 mod index_buffer_3d_object;
 mod loaderinfo_object;
@@ -88,11 +88,11 @@ pub use crate::avm2::object::domain_object::{
 };
 pub use crate::avm2::object::error_object::{error_allocator, ErrorObject, ErrorObjectWeak};
 pub use crate::avm2::object::event_object::{event_allocator, EventObject, EventObjectWeak};
-pub use crate::avm2::object::font_object::{font_allocator, FontObject, FontObjectWeak};
 pub use crate::avm2::object::file_object::{file_allocator, FileObject, FileObjectWeak};
 pub use crate::avm2::object::filestream_object::{
     file_stream_allocator, FileStreamObject, FileStreamObjectWeak,
 };
+pub use crate::avm2::object::font_object::{font_allocator, FontObject, FontObjectWeak};
 pub use crate::avm2::object::function_object::{
     function_allocator, FunctionObject, FunctionObjectWeak,
 };
@@ -193,10 +193,9 @@ use crate::font::Font;
         ResponderObject(ResponderObject<'gc>),
         ShaderDataObject(ShaderDataObject<'gc>),
         SocketObject(SocketObject<'gc>),
-        FontObject(FontObject<'gc>)
+        FontObject(FontObject<'gc>),
         FileObject(FileObject<'gc>),
-        FileStreamObject(FileStreamObject<'gc>),
-        SocketObject(SocketObject<'gc>)
+        FileStreamObject(FileStreamObject<'gc>)
     }
 )]
 pub trait TObject<'gc>: 'gc + Collect + Debug + Into<Object<'gc>> + Clone + Copy {
@@ -1408,6 +1407,9 @@ pub trait TObject<'gc>: 'gc + Collect + Debug + Into<Object<'gc>> + Clone + Copy
     }
 
     fn as_net_connection(self) -> Option<NetConnectionObject<'gc>> {
+        None
+    }
+
     fn as_file_object(&self) -> Option<FileObject<'gc>> {
         None
     }
@@ -1468,9 +1470,8 @@ impl<'gc> Object<'gc> {
             Self::ShaderDataObject(o) => WeakObject::ShaderDataObject(ShaderDataObjectWeak(Gc::downgrade(o.0))),
             Self::SocketObject(o) => WeakObject::SocketObject(SocketObjectWeak(Gc::downgrade(o.0))),
             Self::FontObject(o) => WeakObject::FontObject(FontObjectWeak(GcCell::downgrade(o.0))),
-            Self::FileObject(o) => WeakObject::FileObject(FileObjectWeak(GcCell::downgrade(o.0))),
-            Self::FileStreamObject(o) => WeakObject::FileStreamObject(FileStreamObjectWeak(GcCell::downgrade(o.0))),
-            Self::SocketObject(o) => WeakObject::SocketObject(SocketObjectWeak(Gc::downgrade(o.0)))
+            Self::FileObject(o) => WeakObject::FileObject(FileObjectWeak(Gc::downgrade(o.0))),
+            Self::FileStreamObject(o) => WeakObject::FileStreamObject(FileStreamObjectWeak(Gc::downgrade(o.0)))
         }
     }
 }

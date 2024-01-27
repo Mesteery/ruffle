@@ -1,3 +1,4 @@
+use std::rc::Rc;
 use crate::avm2::amf::{deserialize_value, serialize_value};
 use crate::avm2::bytearray::{ByteArrayStorage, Endian, ObjectEncoding};
 use crate::avm2::error::io_error;
@@ -14,6 +15,7 @@ use encoding_rs::{Encoding, UTF_8};
 use flash_lso::amf0::read::AMF0Decoder;
 use flash_lso::amf3::read::AMF3Decoder;
 use flash_lso::types::{AMFVersion, Element, Lso};
+use fnv::FnvHashMap;
 use ruffle_wstr::WString;
 use std::io::{Read, SeekFrom};
 
@@ -628,8 +630,9 @@ pub fn write_object<'gc>(
         let amf_version: AMFVersion = file_stream_object.object_encoding().into();
         if let Some(ref mut handle) = *file_stream_object.handle().borrow_mut() {
             let obj = args.get(0).cloned().unwrap_or(Value::Undefined);
-            if let Some(amf) = serialize_value(activation, obj, amf_version) {
-                let element = Element::new("", amf);
+            let mut object_table = FnvHashMap::default();
+            if let Some(amf) = serialize_value(activation, obj, amf_version, &mut object_table) {
+                let element = Element::new("", Rc::new(amf));
                 let mut lso = Lso::new(vec![element], "", amf_version);
                 let bytes = flash_lso::write::write_to_bytes(&mut lso)
                     .map_err(|_| "Failed to serialize object")?;

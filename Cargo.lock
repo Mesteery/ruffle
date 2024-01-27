@@ -1860,19 +1860,19 @@ checksum = "aa9a19cbb55df58761df49b23516a86d432839add4af60fc256da840f66ed35b"
 
 [[package]]
 name = "form_urlencoded"
-version = "1.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e13624c2627564efccf4934284bdd98cbaa14e79b0b5a141218e507b3a823456"
+version = "1.2.0"
+source = "git+https://github.com/Mesteery/rust-url?branch=patch-1#d1aeacf870f9fc09720b4da308050c848f263023"
 dependencies = [
- "percent-encoding 2.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "percent-encoding 2.3.0",
 ]
 
 [[package]]
 name = "form_urlencoded"
-version = "1.2.0"
-source = "git+https://github.com/Mesteery/rust-url?branch=patch-1#d1aeacf870f9fc09720b4da308050c848f263023"
+version = "1.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e13624c2627564efccf4934284bdd98cbaa14e79b0b5a141218e507b3a823456"
 dependencies = [
- "percent-encoding 2.3.0 (git+https://github.com/Mesteery/rust-url?branch=patch-1)",
+ "percent-encoding 2.3.1",
 ]
 
 [[package]]
@@ -2439,9 +2439,8 @@ checksum = "b9e0384b61958566e926dc50660321d12159025e767c18e043daf26b70104c39"
 
 [[package]]
 name = "idna"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "634d9b1461af396cad843f47fdba5597a4f9e6ddd4bfb6ff5d85028c25cb12f6"
+version = "0.4.0"
+source = "git+https://github.com/Mesteery/rust-url?branch=patch-1#d1aeacf870f9fc09720b4da308050c848f263023"
 dependencies = [
  "unicode-bidi",
  "unicode-normalization",
@@ -2449,8 +2448,9 @@ dependencies = [
 
 [[package]]
 name = "idna"
-version = "0.4.0"
-source = "git+https://github.com/Mesteery/rust-url?branch=patch-1#d1aeacf870f9fc09720b4da308050c848f263023"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "634d9b1461af396cad843f47fdba5597a4f9e6ddd4bfb6ff5d85028c25cb12f6"
 dependencies = [
  "unicode-bidi",
  "unicode-normalization",
@@ -2604,7 +2604,7 @@ dependencies = [
  "sluice",
  "tracing",
  "tracing-futures",
- "url 2.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "url 2.5.0",
  "waker-fn",
 ]
 
@@ -3692,6 +3692,8 @@ name = "paste"
 version = "1.0.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "de3145af08024dea9fa9914f381a17b8fc6034dfb00f3a84013f7ff43f29ed4c"
+
+[[package]]
 name = "path-clean"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3711,14 +3713,14 @@ checksum = "19b17cddbe7ec3f8bc800887bab5e717348c95ea2ca0b1bf0837fb964dc67099"
 
 [[package]]
 name = "percent-encoding"
-version = "2.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3148f5046208a5d56bcfc03053e3ca6334e51da8dfb19b6cdc8b306fae3283e"
+version = "2.3.0"
+source = "git+https://github.com/Mesteery/rust-url?branch=patch-1#d1aeacf870f9fc09720b4da308050c848f263023"
 
 [[package]]
 name = "percent-encoding"
-version = "2.3.0"
-source = "git+https://github.com/Mesteery/rust-url?branch=patch-1#d1aeacf870f9fc09720b4da308050c848f263023"
+version = "2.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e3148f5046208a5d56bcfc03053e3ca6334e51da8dfb19b6cdc8b306fae3283e"
 
 [[package]]
 name = "pin-project"
@@ -3938,6 +3940,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "pure-rust-locales"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ed02a829e62dc2715ceb8afb4f80e298148e1345749ceb369540fe0eb3368432"
+
+[[package]]
 name = "qoi"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3945,12 +3953,6 @@ checksum = "7f6d64c71eb498fe9eae14ce4ec935c555749aef511cca85b5568910d6e48001"
 dependencies = [
  "bytemuck",
 ]
-
-[[package]]
-name = "pure-rust-locales"
-version = "0.5.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b45c49fc4f91f35bae654f85ebb3a44d60ac64f11b3166ffa609def390c732d8"
 
 [[package]]
 name = "quick-xml"
@@ -4230,7 +4232,7 @@ dependencies = [
  "num-derive 0.4.1",
  "num-traits",
  "path-clean",
- "percent-encoding 2.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "percent-encoding 2.3.1",
  "png",
  "quick-xml",
  "rand",
@@ -4249,7 +4251,7 @@ dependencies = [
  "symphonia",
  "thiserror",
  "tracing",
- "url 2.4.0 (git+https://github.com/Mesteery/rust-url?branch=patch-1)",
+ "url 2.4.0",
  "wasm-bindgen-futures",
  "weak-table",
  "web-time",
@@ -4293,7 +4295,7 @@ dependencies = [
  "tracing-subscriber",
  "tracing-tracy",
  "unic-langid",
- "url 2.4.0 (git+https://github.com/Mesteery/rust-url?branch=patch-1)",
+ "url 2.4.0",
  "vergen",
  "webbrowser",
  "wgpu",
@@ -4452,7 +4454,7 @@ dependencies = [
  "env_logger",
  "futures",
  "image",
- "percent-encoding",
+ "percent-encoding 2.3.1",
  "pretty_assertions",
  "regex",
  "ruffle_core",
@@ -4464,7 +4466,7 @@ dependencies = [
  "toml",
  "tracing",
  "tracing-subscriber",
- "url",
+ "url 2.5.0",
  "vfs",
 ]
 
@@ -4524,7 +4526,7 @@ dependencies = [
  "tracing-log",
  "tracing-subscriber",
  "tracing-wasm",
- "url 2.4.0 (git+https://github.com/Mesteery/rust-url?branch=patch-1)",
+ "url 2.4.0",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
@@ -5109,13 +5111,6 @@ dependencies = [
  "ruffle_core",
  "ruffle_render_wgpu",
  "ruffle_test_framework",
- "ruffle_socket_format",
- "ruffle_video_software",
- "serde",
- "toml",
- "tracing",
- "tracing-subscriber",
- "url 2.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "walkdir",
 ]
 
@@ -5547,23 +5542,23 @@ checksum = "f962df74c8c05a667b5ee8bcf162993134c104e96440b663c8daa176dc772d8c"
 
 [[package]]
 name = "url"
-version = "2.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "31e6302e3bb753d46e83516cae55ae196fc0c309407cf11ab35cc51a4c2a4633"
+version = "2.4.0"
+source = "git+https://github.com/Mesteery/rust-url?branch=patch-1#d1aeacf870f9fc09720b4da308050c848f263023"
 dependencies = [
- "form_urlencoded 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "idna 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "percent-encoding 2.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "form_urlencoded 1.2.0",
+ "idna 0.4.0",
+ "percent-encoding 2.3.0",
 ]
 
 [[package]]
 name = "url"
-version = "2.4.0"
-source = "git+https://github.com/Mesteery/rust-url?branch=patch-1#d1aeacf870f9fc09720b4da308050c848f263023"
+version = "2.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "31e6302e3bb753d46e83516cae55ae196fc0c309407cf11ab35cc51a4c2a4633"
 dependencies = [
- "form_urlencoded 1.2.0 (git+https://github.com/Mesteery/rust-url?branch=patch-1)",
- "idna 0.4.0 (git+https://github.com/Mesteery/rust-url?branch=patch-1)",
- "percent-encoding 2.3.0 (git+https://github.com/Mesteery/rust-url?branch=patch-1)",
+ "form_urlencoded 1.2.1",
+ "idna 0.5.0",
+ "percent-encoding 2.3.1",
 ]
 
 [[package]]
@@ -5839,7 +5834,7 @@ dependencies = [
  "ndk-context",
  "objc",
  "raw-window-handle",
- "url 2.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "url 2.5.0",
  "web-sys",
 ]
 
@@ -6270,7 +6265,7 @@ dependencies = [
  "objc2",
  "once_cell",
  "orbclient",
- "percent-encoding 2.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "percent-encoding 2.3.1",
  "raw-window-handle",
  "redox_syscall 0.3.5",
  "sctk-adwaita",

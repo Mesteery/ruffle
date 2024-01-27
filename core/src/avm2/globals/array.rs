@@ -1231,26 +1231,6 @@ pub fn sort_on<'gc>(
     Ok(0.into())
 }
 
-/// Implements `Array.insertAt`
-pub fn insert_at<'gc>(
-    activation: &mut Activation<'_, 'gc>,
-    this: Object<'gc>,
-    args: &[Value<'gc>],
-) -> Result<Value<'gc>, Error<'gc>> {
-    if let Some(mut array) = this.as_array_storage_mut(activation.context.gc_context) {
-        let position = args
-            .get(0)
-            .cloned()
-            .unwrap_or(Value::Undefined)
-            .coerce_to_i32(activation)?;
-        let value = args.get(1).cloned().unwrap_or(Value::Undefined);
-        
-        array.insert(position, value);
-    }
-
-    Ok(Value::Undefined)
-}
-
 /// Implements `Array.removeAt`
 pub fn remove_at<'gc>(
     activation: &mut Activation<'_, 'gc>,
