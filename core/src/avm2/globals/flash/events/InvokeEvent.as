@@ -8,6 +8,7 @@ package flash.events
 
   import flash.filesystem.File;
 
+  [API("661")]
   public class InvokeEvent extends Event
   {
     public static const INVOKE:String = "invoke";
@@ -15,6 +16,7 @@ package flash.events
     // The array of string arguments passed during this invocation.
     private var _arguments:Array;
 
+    [API("664")]
     // The reason for this InvokeEvent.
     private var _reason:String;
 

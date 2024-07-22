@@ -11,6 +11,7 @@ package flash.display
   import __ruffle__.stub_setter;
   import __ruffle__.stub_constructor;
 
+  [API("661")]
   public class NativeWindow extends EventDispatcher
   {
     public const systemMaxSize:Point = new Point(2880, 2880);
@@ -184,6 +185,7 @@ package flash.display
       return null;
     }
 
+    [API("671")]
     // Returns a list of the NativeWindow objects that are owned by this window.
     public function listOwnedWindows():Vector.<NativeWindow>
     {
@@ -273,18 +275,21 @@ package flash.display
       return "normal";
     }
 
+    [API("668")]
     public function get isSupported():Boolean
     {
       stub_getter("flash.display.NativeWindow", "isSupported");
       return false;
     }
 
+    [API("671")]
     public function get owner():NativeWindow
     {
       stub_getter("flash.display.NativeWindow", "owner");
       return this;
     }
 
+    [API("675")]
     public function get renderMode():String
     {
       stub_getter("flash.display.NativeWindow", "renderMode");
@@ -303,6 +308,7 @@ package flash.display
       return false;
     }
 
+    [API("661")]
     public function get supportsTransparency():Boolean
     {
       stub_getter("flash.display.NativeWindow", "supportsTransparency");

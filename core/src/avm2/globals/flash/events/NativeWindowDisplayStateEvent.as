@@ -5,7 +5,7 @@
 
 package flash.events
 {
-
+  [API("661")]
   public class NativeWindowDisplayStateEvent extends Event
   {
     public static const DISPLAY_STATE_CHANGE:String = "displayStateChange";

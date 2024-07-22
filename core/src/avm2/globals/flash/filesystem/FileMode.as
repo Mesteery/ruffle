@@ -5,7 +5,7 @@
 
 package flash.filesystem
 {
-
+  [API("661")]
   public class FileMode
   {
     public static const APPEND:String = "append";

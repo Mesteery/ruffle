@@ -4,7 +4,8 @@ package flash.system
     import __ruffle__.stub_constructor;
     import __ruffle__.stub_method;
     import __ruffle__.stub_getter;
-
+    
+    [API("682")]
     public class MessageChannel extends EventDispatcher
     {
         private var _state:String = MessageChannelState.OPEN;

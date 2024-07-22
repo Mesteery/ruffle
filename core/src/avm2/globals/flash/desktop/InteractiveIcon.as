@@ -5,7 +5,7 @@
 
 package flash.desktop
 {
-
+  [API("661")]
   public class InteractiveIcon extends Icon
   {
     // The current display height of the icon in pixels.

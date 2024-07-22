@@ -165,6 +165,7 @@ package flash.display {
 
         public native function invalidate():void;
 
+        [API("661")]
         public function get nativeWindow():NativeWindow {
             if (!_nativeWindow) {
                 _nativeWindow = new NativeWindow(new NativeWindowInitOptions(), this);

@@ -12,6 +12,7 @@ package flash.filesystem
   import flash.utils.ByteArray;
 
   [Ruffle(InstanceAllocator)]
+  [API("661")]
   public class FileStream extends EventDispatcher
   {
     public var endian:String = "LITTLE_ENDIAN";

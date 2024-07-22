@@ -3,6 +3,7 @@ package flash.display
   import __ruffle__.stub_getter;
   import flash.geom.Rectangle;
 
+  [API("733")]
   public class ScreenMode
   {
     private var _width:int;
