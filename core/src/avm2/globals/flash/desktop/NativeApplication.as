@@ -247,7 +247,7 @@ package flash.desktop
       stub_setter("flash.desktop.NativeApplication", "executeInBackground");
     }
 
-    [API("721")]
+    // [API("721")] Ruffle doesn't support this API Version
     public function get isCompiledAOT():Boolean
     {
       stub_getter("flash.desktop.NativeApplication", "isCompiledAOT");

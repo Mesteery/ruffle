@@ -45,14 +45,14 @@ package flash.filesystem
     public native function set url(value:String):void;
 
     override public native function get name():String;
-    override public native function get extension():String;
+    // override public native function get extension():String;
     public native function get parent():File;
 
-    override public function get type():String
+    /*override public function get type():String
     {
       stub_getter("flash.filesystem.File", "type");
       return extension;
-    }
+    }*/
 
     public native function resolvePath(path:String):File;
 

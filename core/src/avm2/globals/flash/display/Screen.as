@@ -10,7 +10,7 @@ package flash.display
     private var _width:int;
     private var _height:int;
 
-    [API("733")]
+    // [API("733")] Ruffle doesn't support this API Version
     public var mode:ScreenMode;
 
     public function Screen(width:int, height:int)
@@ -56,7 +56,7 @@ package flash.display
       return bounds;
     }
 
-    [API("733")]
+    // [API("733")] Ruffle doesn't support this API Version
     public function get modes():Array
     {
       stub_getter("flash.display.Screen", "modes");
