@@ -8,6 +8,7 @@ package flash.events
 
   import flash.filesystem.File;
 
+  [API("661")]
   public class InvokeEvent extends Event
   {
     public static const INVOKE:String = "invoke";
@@ -40,6 +41,7 @@ package flash.events
       return this._arguments;
     }
 
+    [API("664")]
     public function get reason():String
     {
       return this._reason;

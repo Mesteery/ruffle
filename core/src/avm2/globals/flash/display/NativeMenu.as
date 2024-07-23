@@ -9,7 +9,8 @@ package flash.display
     import flash.events.EventDispatcher;
     import __ruffle__.stub_method;
     import __ruffle__.stub_getter;
-
+    
+    [API("661")]
     public class NativeMenu extends EventDispatcher
     {
 
@@ -125,6 +126,7 @@ package flash.display
             stub_method("flash.display.NativeMenu", "setItemIndex");
         }
 
+        [API("668")]
         public function get isSupported():Boolean
         {
             return this._isSupported;

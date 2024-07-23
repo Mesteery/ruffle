@@ -8,6 +8,7 @@ package flash.filesystem
   import __ruffle__.stub_getter;
 
   [Ruffle(InstanceAllocator)]
+  [API("661")]
   public class File extends FileReference
   {
     private static var _applicationStorageDirectory:File;
@@ -31,6 +32,7 @@ package flash.filesystem
       }
     }
 
+    [API("681")]
     public static function get permissionStatus():String
     {
       stub_method("flash.net.FileReference", "permissionStatus");
@@ -128,11 +130,13 @@ package flash.filesystem
       stub_method("flash.filesystem.File", "openWithDefaultApplication");
     }
 
+    [API("668")]
     public function get downloaded():Boolean
     {
       stub_getter("flash.filesystem.File", "downloaded");
     }
 
+    [API("668")]
     public function set downloaded(value:Boolean):void
     {
       stub_setter("flash.filesystem.File", "downloaded");
@@ -251,6 +255,7 @@ package flash.filesystem
     }
 
     // [override] Requests permission to access filesystem.
+    [API("681")]
     override public function requestPermission():void
     {
       // Unknown Implementation

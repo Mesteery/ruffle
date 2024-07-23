@@ -4,6 +4,7 @@ package flash.system
     import __ruffle__.stub_getter;
     import __ruffle__.stub_method;
 
+    [API("682")]
     public class WorkerDomain
     {
         public static const isSupported:Boolean = false;

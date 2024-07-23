@@ -3,12 +3,14 @@ package flash.display
   import __ruffle__.stub_getter;
   import flash.geom.Rectangle;
 
-  public class Screen
+  [API("661")]
+  public final class Screen
   {
     private static var _screens:Array;
     private var _width:int;
     private var _height:int;
 
+    [API("733")]
     public var mode:ScreenMode;
 
     public function Screen(width:int, height:int)
@@ -54,6 +56,7 @@ package flash.display
       return bounds;
     }
 
+    [API("733")]
     public function get modes():Array
     {
       stub_getter("flash.display.Screen", "modes");

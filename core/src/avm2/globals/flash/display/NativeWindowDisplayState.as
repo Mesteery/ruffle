@@ -1,5 +1,6 @@
 package flash.display
 {
+  [API("661")]
   public final class NativeWindowDisplayState
   {
     public static const MAXIMIZED:String = "maximized";

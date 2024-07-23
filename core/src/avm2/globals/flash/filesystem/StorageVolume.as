@@ -11,6 +11,7 @@ package flash.filesystem
     import __ruffle__.stub_getter;
     import __ruffle__.stub_setter;
 
+    [API("668")]
     public class StorageVolume
     {
 

@@ -8,6 +8,7 @@ package flash.events
 
   import flash.geom.Rectangle;
 
+  [API("661")]
   public class NativeWindowBoundsEvent extends Event
   {
     public static const RESIZE:String = "resize";

@@ -17,6 +17,7 @@ package flash.events {
 
 		public static const CLOSE:String = "close";
 
+		[API("661")]
 		public static const CLOSING:String = "closing";
 
 		public static const COMPLETE:String = "complete";
@@ -33,8 +34,7 @@ package flash.events {
 
 		public static const FRAME_CONSTRUCTED:String = "frameConstructed";
 
-		public static const EXIT:String = "exit";
-
+		[API("661")]
 		public static const EXITING:String = "exiting";
 
 		public static const EXIT_FRAME:String = "exitFrame";

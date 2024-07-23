@@ -5,7 +5,7 @@
 
 package flash.events
 {
-
+  [API("661")]
   public class HTMLUncaughtScriptExceptionEvent extends Event
   {
 
