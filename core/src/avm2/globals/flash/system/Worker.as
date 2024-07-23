@@ -4,6 +4,7 @@ package flash.system
     import __ruffle__.stub_constructor;
     import __ruffle__.stub_method;
 
+    [API("682")]
     public class Worker extends EventDispatcher
     {
         private static var _current:Worker;

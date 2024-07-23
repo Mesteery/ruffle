@@ -5,6 +5,7 @@
 
 package flash.display
 {
+  [API("661")]
   public class NativeWindowInitOptions
   {
 
@@ -15,9 +16,11 @@ package flash.display
     public var minimizable:Boolean;
 
     // Specifies the NativeWindow object that should own any windows created with this NativeWindowInitOptions.
+    [API("671")]
     public var owner:NativeWindow;
 
     // Specifies the render mode of the NativeWindow object created with this NativeWindowInitOptions.
+    [API("675")]
     public var renderMode:String;
 
     // Specifies whether the window can be resized by the user.
@@ -34,7 +37,13 @@ package flash.display
 
     public function NativeWindowInitOptions()
     {
-
+      systemChrome = NativeWindowSystemChrome.STANDARD;
+      type = NativeWindowType.NORMAL;
+      transparent = false;
+      owner = null;
+      resizable = true;
+      maximizable = true;
+      minimizable = true;
     }
 
   }

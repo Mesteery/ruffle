@@ -12,6 +12,7 @@ package flash.desktop
   import __ruffle__.stub_getter;
   import __ruffle__.stub_setter;
 
+  [API("661")]
   public final class NativeApplication extends EventDispatcher
   {
     private static var _instance:NativeApplication;
@@ -54,12 +55,14 @@ package flash.desktop
       return false;
     }
 
+    [API("668")]
     public static function get supportsDefaultApplication():Boolean
     {
       stub_getter("flash.desktop.NativeApplication", "supportsDefaultApplication");
       return false;
     }
 
+    [API("668")]
     public static function get supportsStartAtLogin():Boolean
     {
       stub_getter("flash.desktop.NativeApplication", "supportsStartAtLogin");
@@ -122,12 +125,14 @@ package flash.desktop
       return null;
     }
 
+    [API("668")]
     public function get systemIdleMode():String
     {
       stub_getter("flash.desktop.NativeApplication", "systemIdleMode");
       return "normal";
     }
 
+    [API("668")]
     public function set systemIdleMode(param1:String):void
     {
       stub_setter("flash.desktop.NativeApplication", "systemIdleMode");
@@ -229,17 +234,20 @@ package flash.desktop
       stub_method("flash.desktop.NativeApplication", "removeAsDefaultApplication");
     }
 
+    [API("681")]
     public function get executeInBackground():Boolean
     {
       stub_getter("flash.desktop.NativeApplication", "executeInBackground");
       return false;
     }
 
+    [API("681")]
     public function set executeInBackground(param1:Boolean):void
     {
       stub_setter("flash.desktop.NativeApplication", "executeInBackground");
     }
 
+    [API("721")]
     public function get isCompiledAOT():Boolean
     {
       stub_getter("flash.desktop.NativeApplication", "isCompiledAOT");
