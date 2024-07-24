@@ -393,7 +393,7 @@ pub fn get_name<'gc>(
     Ok(Value::Null)
 }
 
-pub fn get_extension<'gc>(
+pub fn get_type<'gc>(
     activation: &mut Activation<'_, 'gc>,
     this: Object<'gc>,
     _args: &[Value<'gc>],
@@ -403,7 +403,7 @@ pub fn get_extension<'gc>(
             if let Some(extension) = path.extension() {
                 return Ok(AvmString::new_utf8(
                     activation.context.gc_context,
-                    extension.to_string_lossy(),
+                    format!(".{}", extension.to_string_lossy()),
                 )
                 .into());
             }
