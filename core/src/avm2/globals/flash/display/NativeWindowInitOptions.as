@@ -37,8 +37,8 @@ package flash.display
 
     public function NativeWindowInitOptions()
     {
-      systemChrome = "standard";
-      type = "normal";
+      systemChrome = NativeWindowSystemChrome.STANDARD;
+      type = NativeWindowType.NORMAL;
       transparent = false;
       owner = null;
       resizable = true;
