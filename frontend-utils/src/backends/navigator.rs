@@ -309,7 +309,16 @@ impl<F: FutureSpawner + 'static, I: NavigatorInterface> NavigatorBackend
 
     fn resolve_url(&self, url: &str) -> Result<Url, ParseError> {
         match self.base_url.join(url) {
-            Ok(url) => Ok(self.pre_process_url(url)),
+            Ok(uri) => {
+                if !url.starts_with('/') && !url.starts_with('\\') {
+                    Ok(self.pre_process_url(match uri.scheme() {
+                        "file" | "data" | "http" | "https" => uri,
+                        _ => self.base_url.join(&format!("/{}", url)).unwrap(),
+                    }))
+                } else {
+                    Ok(self.pre_process_url(uri))
+                }
+            }
             Err(error) => Err(error),
         }
     }
