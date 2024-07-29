@@ -8,6 +8,7 @@ pub mod display3D;
 pub mod events;
 pub mod external;
 pub mod geom;
+pub mod globalization;
 pub mod media;
 pub mod net;
 pub mod system;

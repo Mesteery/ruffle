@@ -7,6 +7,7 @@ package flash.globalization {
     public final class DateTimeFormatter {
         private var _dateStyle:String;
         private var _dateTimePattern:String;
+        private var _chronoDateTimePattern:String;
         private var _localeIDName:String;
         private var _timeStyle:String;
 
@@ -18,7 +19,7 @@ package flash.globalization {
             stub_constructor("flash.globalization.DateTimeFormatter");
             if (requestedLocaleIDName == null) throwNonNull("requestedLocaleIDName");
             this._localeIDName = requestedLocaleIDName;
-            this._dateTimePattern = "EEEE, MMMM d, yyyy h:mm:ss a";
+            this.setDateTimePattern("EEEE, MMMM d, yyyy h:mm:ss a");
             this.setDateTimeStyles(dateStyle, timeStyle);
         }
 
@@ -45,8 +46,11 @@ package flash.globalization {
         public function formatUTC(dateTime:Date):String {
             stub_method("flash.globalization.DateTimeFormatter", "formatUTC");
             if (dateTime == null) throwNonNull("dateTime");
-            return dateTime.toUTCString();
+            return formatUTCInternal(dateTime, this._localeIDName, this._chronoDateTimePattern);
         }
+
+        private native function formatUTCInternal(dateTime:Date, locale:String, dateTimePattern: String):String;
+        private native function convertPatternInternal(dateTimePattern: String):Date;
 
         public static function getAvailableLocaleIDNames():Vector.<String> {
             stub_method("flash.globalization.DateTimeFormatter", "getAvailableLocaleIDNames");
@@ -88,6 +92,7 @@ package flash.globalization {
             stub_method("flash.globalization.DateTimeFormatter", "setDateTimePattern");
             if (pattern == null) throwNonNull("pattern");
             this._dateTimePattern = pattern;
+            this._chronoDateTimePattern = convertPatternInternal(pattern);
         }
 
         public function setDateTimeStyles(dateStyle:String, timeStyle:String):void {
