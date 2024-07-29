@@ -46,7 +46,7 @@ impl OsFileSystemBackend {
         let user_dirs = UserDirs::new().unwrap();
         Self(KnownDirectories {
             app: base_url,
-            app_storage: base_dirs.data_dir().join("APP_NAME_TODO/Local Store"),
+            app_storage: base_dirs.data_dir().join("Dofus/Local Store"),
             documents: user_dirs.document_dir().unwrap().into(),
             desktop: user_dirs.desktop_dir().unwrap().into(),
             user: user_dirs.home_dir().into(),
