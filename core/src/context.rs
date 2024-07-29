@@ -15,6 +15,7 @@ use crate::avm2::TObject as _;
 use crate::avm2::{Avm2, Object as Avm2Object, SoundChannelObject};
 use crate::backend::{
     audio::{AudioBackend, AudioManager, SoundHandle, SoundInstanceHandle},
+    filesystem::FileSystemBackend,
     log::LogBackend,
     navigator::NavigatorBackend,
     storage::StorageBackend,
@@ -135,6 +136,9 @@ pub struct UpdateContext<'gc> {
 
     /// The storage backend, used for storing persistent state
     pub storage: &'gc mut dyn StorageBackend,
+
+    /// The filesystem backend, used for loading external files
+    pub filesystem: &'gc mut dyn FileSystemBackend,
 
     /// The logging backend, used for trace output capturing.
     ///

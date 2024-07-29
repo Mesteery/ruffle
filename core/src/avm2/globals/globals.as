@@ -335,7 +335,11 @@ include "flash/net/URLStream.as"
 include "flash/net/URLVariables.as"
 include "flash/net/XMLSocket.as"
 
+include "flash/filesystem/FileMode.as"
+include "flash/filesystem/FileStream.as"
 include "flash/filesystem/File.as" // File extends FileReference
+include "flash/filesystem/StorageVolume.as"
+include "flash/filesystem/StorageVolumeInfo.as"
 
 include "flash/net/drm/AuthenticationMethod.as"
 include "flash/net/drm/LoadVoucherSetting.as"

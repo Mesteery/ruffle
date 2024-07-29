@@ -12,6 +12,7 @@ use crate::avm2::{
 use crate::backend::ui::FontDefinition;
 use crate::backend::{
     audio::{AudioBackend, AudioManager},
+    filesystem::FileSystemBackend,
     log::LogBackend,
     navigator::{NavigatorBackend, Request},
     storage::StorageBackend,
@@ -269,6 +270,7 @@ type Audio = Box<dyn AudioBackend>;
 type Navigator = Box<dyn NavigatorBackend>;
 type Renderer = Box<dyn RenderBackend>;
 type Storage = Box<dyn StorageBackend>;
+type FileSystem = Box<dyn FileSystemBackend>;
 type Log = Box<dyn LogBackend>;
 type Ui = Box<dyn UiBackend>;
 type Video = Box<dyn VideoBackend>;
@@ -302,6 +304,7 @@ pub struct Player {
     audio: Audio,
     navigator: Navigator,
     storage: Storage,
+    filesystem: FileSystem,
     log: Log,
     ui: Ui,
     video: Video,
@@ -2217,6 +2220,7 @@ impl Player {
                 page_url: &mut this.page_url,
                 instance_counter: &mut this.instance_counter,
                 storage: this.storage.deref_mut(),
+                filesystem: this.filesystem.deref_mut(),
                 log: this.log.deref_mut(),
                 video: this.video.deref_mut(),
                 avm1_shared_objects,
@@ -2446,6 +2450,7 @@ pub struct PlayerBuilder {
     navigator: Option<Navigator>,
     renderer: Option<Renderer>,
     storage: Option<Storage>,
+    filesystem: Option<FileSystem>,
     ui: Option<Ui>,
     video: Option<Video>,
 
@@ -2495,6 +2500,7 @@ impl PlayerBuilder {
             navigator: None,
             renderer: None,
             storage: None,
+            filesystem: None,
             ui: None,
             video: None,
 
@@ -2587,6 +2593,12 @@ impl PlayerBuilder {
     #[inline]
     pub fn with_storage(mut self, storage: Box<dyn StorageBackend>) -> Self {
         self.storage = Some(storage);
+        self
+    }
+
+    #[inline]
+    pub fn with_filesystem_storage(mut self, filesystem: impl 'static + FileSystemBackend) -> Self {
+        self.filesystem = Some(Box::new(filesystem));
         self
     }
 
@@ -2828,6 +2840,9 @@ impl PlayerBuilder {
         let storage = self
             .storage
             .unwrap_or_else(|| Box::new(storage::MemoryStorageBackend::new()));
+        let filesystem = self
+            .filesystem
+            .unwrap_or_else(|| Box::new(filesystem::NullFileSystemBackend::new()));
         let ui = self
             .ui
             .unwrap_or_else(|| Box::new(ui::NullUiBackend::new()));
@@ -2849,6 +2864,7 @@ impl PlayerBuilder {
                 navigator,
                 renderer,
                 storage,
+                filesystem,
                 ui,
                 video,
 
