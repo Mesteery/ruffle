@@ -4,8 +4,8 @@ use crate::{
         ExecutionReason, Object as Avm1Object, TObject as Avm1TObject,
     },
     avm2::{
-        object::SocketObject, Activation as Avm2Activation, Avm2, EventObject,
-        TObject as Avm2TObject,
+        error::security_error, object::SocketObject, Activation as Avm2Activation, Avm2, Error,
+        EventObject, TObject as Avm2TObject,
     },
     backend::navigator::NavigatorBackend,
     context::UpdateContext,
@@ -18,7 +18,6 @@ use std::{
     cell::{Cell, RefCell},
     time::Duration,
 };
-
 new_key_type! {
     pub struct SocketHandle;
 }
@@ -95,6 +94,7 @@ impl<'gc> Sockets<'gc> {
         target: SocketObject<'gc>,
         host: String,
         port: u16,
+        secure: bool,
     ) {
         let (sender, receiver) = unbounded();
 
@@ -105,6 +105,7 @@ impl<'gc> Sockets<'gc> {
         backend.connect_socket(
             host,
             port,
+            secure,
             Duration::from_millis(target.timeout().into()),
             handle,
             receiver,
@@ -139,6 +140,7 @@ impl<'gc> Sockets<'gc> {
         backend.connect_socket(
             host,
             port,
+            false,
             Duration::from_millis(xml_socket.timeout().into()),
             handle,
             receiver,
@@ -433,5 +435,16 @@ impl<'gc> Sockets<'gc> {
                 }
             }
         }
+    }
+}
+
+pub(crate) fn invalid_port_number<'gc>(activation: &mut Avm2Activation<'_, 'gc>) -> Error<'gc> {
+    match security_error(
+        activation,
+        "Error #2003: Invalid socket port number specified.",
+        2003,
+    ) {
+        Ok(err) => Error::AvmError(err),
+        Err(e) => e,
     }
 }

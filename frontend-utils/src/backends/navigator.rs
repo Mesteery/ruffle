@@ -22,10 +22,15 @@ use std::path::Path;
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tokio::io::{split, AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt};
 use tokio::net::TcpStream;
+use tokio_rustls::rustls::{pki_types::ServerName, ClientConfig, RootCertStore};
+use tokio_rustls::TlsConnector;
 use tracing::warn;
 use url::{ParseError, Url};
+
+trait AsyncStream: AsyncRead + AsyncWrite + Unpin + Send {}
+impl<T: AsyncRead + AsyncWrite + Unpin + Send> AsyncStream for T {}
 
 pub trait NavigatorInterface: Clone + Send + 'static {
     fn confirm_website_navigation(&self, url: &Url) -> bool;
@@ -324,6 +329,7 @@ impl<F: FutureSpawner + 'static, I: NavigatorInterface> NavigatorBackend
         &mut self,
         host: String,
         port: u16,
+        secure: bool,
         timeout: Duration,
         handle: SocketHandle,
         receiver: Receiver<Vec<u8>>,
@@ -370,7 +376,10 @@ impl<F: FutureSpawner + 'static, I: NavigatorInterface> NavigatorBackend
                 Result::<TcpStream, io::Error>::Err(io::Error::new(ErrorKind::TimedOut, ""))
             };
 
-            let mut stream = match TcpStream::connect((host, port)).or(timeout).await {
+            let stream: Box<dyn AsyncStream> = match TcpStream::connect((host, port))
+                .or(timeout)
+                .await
+            {
                 Err(e) if e.kind() == ErrorKind::TimedOut => {
                     warn!("Connection to {}:{} timed out", host2, port);
                     sender
@@ -378,13 +387,45 @@ impl<F: FutureSpawner + 'static, I: NavigatorInterface> NavigatorBackend
                         .expect("working channel send");
                     return;
                 }
+
+                Ok(stream) if secure => {
+                    let mut root_cert_store = RootCertStore::empty();
+                    root_cert_store.extend(webpki_roots::TLS_SERVER_ROOTS.iter().cloned());
+                    let config = ClientConfig::builder()
+                        .with_root_certificates(root_cert_store)
+                        .with_no_client_auth();
+                    let connector = TlsConnector::from(Arc::new(config));
+                    let dnsname = ServerName::try_from(host2.clone()).unwrap();
+
+                    match connector.connect(dnsname, stream).await {
+                        Ok(stream) => {
+                            sender
+                                .try_send(SocketAction::Connect(handle, ConnectionState::Connected))
+                                .expect("working channel send");
+
+                            Box::new(stream)
+                        }
+                        Err(err) => {
+                            warn!(
+                                "Failed to establish TLS connection to {}:{}, error: {}",
+                                host2, port, err
+                            );
+                            sender
+                                .try_send(SocketAction::Connect(handle, ConnectionState::Failed))
+                                .expect("working channel send");
+                            return;
+                        }
+                    }
+                }
+
                 Ok(stream) => {
                     sender
                         .try_send(SocketAction::Connect(handle, ConnectionState::Connected))
                         .expect("working channel send");
 
-                    stream
+                    Box::new(stream)
                 }
+
                 Err(err) => {
                     warn!("Failed to connect to {}:{}, error: {}", host2, port, err);
                     sender
@@ -397,7 +438,7 @@ impl<F: FutureSpawner + 'static, I: NavigatorInterface> NavigatorBackend
             let sender = sender;
             //NOTE: We clone the sender here as we cant share it between async tasks.
             let sender2 = sender.clone();
-            let (mut read, mut write) = stream.split();
+            let (mut read, mut write) = split(stream);
 
             let read = async move {
                 loop {
@@ -477,10 +518,6 @@ impl<F: FutureSpawner + 'static, I: NavigatorInterface> NavigatorBackend
                _ = read => {},
                _ = write => {},
             };
-
-            if let Err(e) = stream.shutdown().await {
-                tracing::warn!("Failed to shutdown write half of TcpStream: {e}");
-            }
         });
 
         tokio::spawn(future);
@@ -606,6 +643,7 @@ mod tests {
         backend.connect_socket(
             addr.ip().to_string(),
             addr.port(),
+            false,
             timeout,
             dummy_handle!(),
             receiver,

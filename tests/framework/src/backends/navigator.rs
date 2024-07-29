@@ -273,6 +273,7 @@ impl NavigatorBackend for TestNavigatorBackend {
         &mut self,
         host: String,
         port: u16,
+        _secure: bool,
         _timeout: Duration,
         handle: SocketHandle,
         receiver: Receiver<Vec<u8>>,

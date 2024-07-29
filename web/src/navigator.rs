@@ -411,6 +411,8 @@ impl NavigatorBackend for WebNavigatorBackend {
         &mut self,
         host: String,
         port: u16,
+        // WebSocket is always secure.
+        _secure: bool,
         // NOTE: WebSocket does not allow specifying a timeout, so this goes unused.
         _timeout: Duration,
         handle: SocketHandle,

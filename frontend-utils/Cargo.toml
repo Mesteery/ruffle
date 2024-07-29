@@ -26,6 +26,8 @@ futures-lite = "2.3.0"
 webbrowser = "1.0.1"
 reqwest = { version = "0.12.6", default-features = false, features = ["rustls-tls", "cookies", "charset", "http2", "macos-system-configuration"] }
 tokio = { workspace = true, features = ["net"] }
+tokio-rustls = { version = "0.26.0", default-features = false, features = ["logging", "tls12", "ring"] }
+webpki-roots = "0.26.3"
 
 [dev-dependencies]
 tempfile = "3"

@@ -1,12 +1,13 @@
 use std::rc::Rc;
 
 use crate::avm2::bytearray::{Endian, ObjectEncoding};
-use crate::avm2::error::{io_error, make_error_2008, security_error};
+use crate::avm2::error::{io_error, make_error_2008};
 pub use crate::avm2::object::socket_allocator;
 use crate::avm2::parameters::ParametersExt;
 use crate::avm2::string::AvmString;
 use crate::avm2::{Activation, Error, Object, TObject, Value};
 use crate::context::UpdateContext;
+use crate::socket::invalid_port_number;
 use encoding_rs::Encoding;
 use encoding_rs::UTF_8;
 use flash_lso::amf0::read::AMF0Decoder;
@@ -45,7 +46,13 @@ pub fn connect<'gc>(
         sockets, navigator, ..
     } = activation.context;
 
-    sockets.connect_avm2(*navigator, socket, host.to_utf8_lossy().into_owned(), port);
+    sockets.connect_avm2(
+        *navigator,
+        socket,
+        host.to_utf8_lossy().into_owned(),
+        port,
+        false,
+    );
 
     Ok(Value::Undefined)
 }
@@ -740,17 +747,6 @@ fn invalid_socket_error<'gc>(activation: &mut Activation<'_, 'gc>) -> Error<'gc>
         activation,
         "Error #2002: Operation attempted on invalid socket.",
         2002,
-    ) {
-        Ok(err) => Error::AvmError(err),
-        Err(e) => e,
-    }
-}
-
-fn invalid_port_number<'gc>(activation: &mut Activation<'_, 'gc>) -> Error<'gc> {
-    match security_error(
-        activation,
-        "Error #2003: Invalid socket port number specified.",
-        2003,
     ) {
         Ok(err) => Error::AvmError(err),
         Err(e) => e,
